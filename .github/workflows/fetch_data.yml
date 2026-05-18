@@ -1,0 +1,41 @@
+name: 每日台股分點資料抓取
+
+on:
+  schedule:
+    - cron: '30 6 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests pandas
+
+      - name: 抓取分點買超資料
+        run: python scripts/fetch_broker.py
+
+      - name: 抓取集保戶數資料
+        run: python scripts/fetch_chips.py
+
+      - name: 計算三關篩選
+        run: python scripts/calc_watchlist.py
+
+      - name: Commit & Push 更新資料
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "📊 自動更新：$(date '+%Y-%m-%d %H:%M') 台股分點資料"
+          git push
