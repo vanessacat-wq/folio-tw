@@ -866,5 +866,72 @@ function showErr(msg){
 renderSidebarWL();
 renderHome();
 </script>
+
+<!-- Mobile Bottom Nav -->
+<style>
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--accent);padding:8px 0 env(safe-area-inset-bottom);z-index:999;border-top:1px solid rgba(255,255,255,0.1)}
+.mobile-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.mob-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;cursor:pointer;color:rgba(255,255,255,0.55);transition:all .2s;border-radius:8px;min-width:60px}
+.mob-nav-item:hover,.mob-nav-item.active{color:#fff}
+.mob-nav-item.active{background:rgba(255,255,255,0.12)}
+.mob-nav-icon{font-size:20px;line-height:1}
+.mob-nav-label{font-size:10px;font-weight:500;letter-spacing:0.02em}
+.mobile-search{display:none;position:fixed;top:0;left:0;right:0;background:var(--accent);padding:12px 16px env(safe-area-inset-top);z-index:998;box-shadow:0 2px 12px rgba(0,0,0,0.2)}
+.mobile-search-inner{display:flex;gap:8px;align-items:center}
+.mobile-search input{flex:1;border:none;border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--text)}
+.mobile-search button{background:var(--accent2);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+@media(max-width:900px){
+  .mobile-nav{display:block}
+  .mobile-search{display:block}
+  .main{padding:16px;padding-top:72px;padding-bottom:90px}
+  .header{display:none}
+  .chips{margin-bottom:14px}
+}
+</style>
+
+<div class="mobile-search">
+  <div class="mobile-search-inner">
+    <input id="mobileSearchInput" type="text" placeholder="輸入代碼 eg. 2330、AAPL..."
+      onkeydown="if(event.key==='Enter'){document.getElementById('searchInput').value=this.value;doSearch()}">
+    <button onclick="document.getElementById('searchInput').value=document.getElementById('mobileSearchInput').value;doSearch()">分析</button>
+  </div>
+</div>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <div class="mob-nav-item active" id="mob-home" onclick="mobNav('home')">
+      <span class="mob-nav-icon">📊</span>
+      <span class="mob-nav-label">首頁</span>
+    </div>
+    <div class="mob-nav-item" id="mob-tw" onclick="mobNav('tw')">
+      <span class="mob-nav-icon">🇹🇼</span>
+      <span class="mob-nav-label">台股</span>
+    </div>
+    <div class="mob-nav-item" id="mob-us" onclick="mobNav('us')">
+      <span class="mob-nav-icon">🇺🇸</span>
+      <span class="mob-nav-label">美股</span>
+    </div>
+    <div class="mob-nav-item" id="mob-mb" onclick="mobNav('mb')">
+      <span class="mob-nav-icon">🔍</span>
+      <span class="mob-nav-label">主力選股</span>
+    </div>
+    <div class="mob-nav-item" id="mob-ft" onclick="mobNav('ft')">
+      <span class="mob-nav-icon">📺</span>
+      <span class="mob-nav-label">CNBC</span>
+    </div>
+  </div>
+</nav>
+
+<script>
+function mobNav(tab){
+  document.querySelectorAll('.mob-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('mob-'+tab)?.classList.add('active');
+  if(tab==='home') goHome();
+  else if(tab==='tw'){hintFilter('tw');document.getElementById('mobileSearchInput').focus();}
+  else if(tab==='us'){hintFilter('us');document.getElementById('mobileSearchInput').focus();}
+  else if(tab==='mb') openMasterBroker();
+  else if(tab==='ft') openFT();
+}
+</script>
 </body>
 </html>
