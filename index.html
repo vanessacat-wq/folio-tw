@@ -703,77 +703,72 @@ async function loadStock(raw){
 // ── API ── 
 const AVKEY='3V3TLKGX0M0EFBI7';
 
-// Stooq proxy via allorigins (no CORS)
-async function stooqFetch(sym){
-  const s = /^\d{4}$/.test(sym) ? sym+'.tw' : sym.toLowerCase();
-  const url = `https://stooq.com/q/l/?s=${s}&f=sd2t2ohlcvn&h&e=csv`;
-  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const r = await fetch(proxy);
-  if(!r.ok) throw new Error('stooq failed');
-  const txt = await r.text();
-  const lines = txt.trim().split('\n');
-  if(lines.length<2) throw new Error('no data');
-  const vals = lines[1].split(',');
-  // Symbol,Date,Time,Open,High,Low,Close,Volume,Name
-  return {
-    date: vals[1], open: parseFloat(vals[3]), high: parseFloat(vals[4]),
-    low: parseFloat(vals[5]), close: parseFloat(vals[6]),
-    volume: parseInt(vals[7]||0), name: vals[8]||sym
-  };
+async function proxyFetch(url){
+  // Try multiple CORS proxies in order
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    `https://thingproxy.freeboard.io/fetch/${url}`,
+  ];
+  for(const proxy of proxies){
+    try{
+      const r = await fetch(proxy, {signal: AbortSignal.timeout(8000)});
+      if(r.ok){
+        const txt = await r.text();
+        if(txt && txt.length > 10) return txt;
+      }
+    }catch(e){ continue; }
+  }
+  throw new Error('All proxies failed');
 }
 
 async function fetchQuote(sym){
-  const isTW=/\.TW$/i.test(sym)||/^\d{4}$/.test(sym);
+  const isTW=/^\d{4}$/.test(sym)||/\.TW$/i.test(sym);
+  const s = /^\d{4}$/.test(sym) ? sym+'.tw' : sym.toLowerCase();
+
   try{
-    const d = await stooqFetch(sym);
-    if(!d.close||isNaN(d.close)) throw new Error('no price');
-    // Get prev close from candles
-    let prevClose = d.close;
-    try{
-      const candles = await fetchCandlesStooq(sym);
-      if(candles&&candles.length>=2) prevClose = candles[candles.length-2].close;
-    }catch(e){}
-    return{
-      price:d.close, prevClose, open:d.open, high:d.high, low:d.low,
-      volume:d.volume, exchange:isTW?'TWSE':'US', name:d.name||sym,
-      marketCap:0, hi52:0, lo52:0
-    };
+    const url = `https://stooq.com/q/l/?s=${s}&f=sd2t2ohlcvn&h&e=csv`;
+    const txt = await proxyFetch(url);
+    const lines = txt.trim().split('\n');
+    if(lines.length < 2) throw new Error('no data');
+    const vals = lines[1].split(',');
+    const price = parseFloat(vals[6]);
+    const open = parseFloat(vals[3]);
+    const high = parseFloat(vals[4]);
+    const low = parseFloat(vals[5]);
+    const vol = parseInt(vals[7]||0);
+    const name = (vals[8]||sym).trim();
+    if(!price||isNaN(price)) throw new Error('invalid price');
+    return{price,prevClose:price,open,high,low,volume:vol,exchange:isTW?'TWSE':'US',name,marketCap:0,hi52:high*1.3,lo52:low*0.7};
   }catch(e){
-    // Fallback to Finnhub for US stocks
-    if(!/^\d{4}/.test(sym)){
+    // Fallback: Finnhub for US stocks
+    if(!isTW){
       try{
-        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym.toUpperCase()}&token=${FKEY}`);
         const d=await r.json();
         if(d.c&&d.c>0){
           let name=sym;
-          try{const pr=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FKEY}`);const pd=await pr.json();if(pd.name)name=pd.name;}catch(e){}
+          try{const pr=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym.toUpperCase()}&token=${FKEY}`);const pd=await pr.json();if(pd.name)name=pd.name;}catch(e){}
           return{price:d.c,prevClose:d.pc,open:d.o,high:d.h,low:d.l,volume:0,exchange:'US',name,marketCap:0,hi52:d.h,lo52:d.l};
         }
       }catch(e2){}
     }
-    throw new Error('無法取得報價，請確認代碼正確');
+    throw new Error('無法取得報價，請稍後再試');
   }
 }
 
-async function fetchCandlesStooq(sym){
-  const s = /^\d{4}$/.test(sym) ? sym+'.tw' : sym.toLowerCase();
-  const url = `https://stooq.com/q/d/l/?s=${s}&i=d`;
-  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const r = await fetch(proxy);
-  if(!r.ok) return null;
-  const txt = await r.text();
-  const lines = txt.trim().split('\n').slice(1); // skip header
-  if(!lines.length) return null;
-  return lines.slice(-100).map(line=>{
-    const v = line.split(',');
-    return{date:new Date(v[0]),open:parseFloat(v[1]),high:parseFloat(v[2]),low:parseFloat(v[3]),close:parseFloat(v[4]),volume:parseInt(v[5]||0)};
-  }).filter(c=>c.close&&!isNaN(c.close));
-}
-
 async function fetchCandles(sym){
+  const s = /^\d{4}$/.test(sym) ? sym+'.tw' : sym.toLowerCase();
   try{
-    const candles = await fetchCandlesStooq(sym);
-    if(candles&&candles.length>10) return candles;
+    const url = `https://stooq.com/q/d/l/?s=${s}&i=d`;
+    const txt = await proxyFetch(url);
+    const lines = txt.trim().split('\n').slice(1);
+    if(!lines.length) return null;
+    const candles = lines.slice(-100).map(line=>{
+      const v = line.split(',');
+      return{date:new Date(v[0]),open:parseFloat(v[1]),high:parseFloat(v[2]),low:parseFloat(v[3]),close:parseFloat(v[4]),volume:parseInt(v[5]||0)};
+    }).filter(c=>c.close&&!isNaN(c.close));
+    if(candles.length > 10) return candles;
   }catch(e){}
   return null;
 }
