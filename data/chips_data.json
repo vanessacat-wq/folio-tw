@@ -1,4 +1,13 @@
 {
-  "stocks": {},
-  "last_updated": ""
+  "stocks": {
+    "": {
+      "sym": "",
+      "history": [],
+      "trend": "unknown",
+      "change_pct": 0,
+      "latest_holders": 0,
+      "last_updated": "2026-05-19 04:02:35"
+    }
+  },
+  "last_updated": "2026-05-19 04:02:36"
 }

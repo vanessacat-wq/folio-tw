@@ -1,13 +1,201 @@
 {
-  "last_updated": "",
-  "fetch_date": "",
-  "watchlist": [],
+  "last_updated": "2026-05-19 04:02:36",
+  "fetch_date": "20260519",
+  "watchlist": [
+    {
+      "sym": "",
+      "name": "00953B",
+      "consecutive_days": 30,
+      "is_increasing": true,
+      "recent_nets": [
+        19501125,
+        13371432,
+        13246973,
+        12995549,
+        11087600
+      ],
+      "total_net_5d": 70202679,
+      "chips_trend": "unknown",
+      "chips_change_pct": 0,
+      "gates": {
+        "gate1": true,
+        "gate2": true,
+        "gate3": null,
+        "gate1_detail": "連續30天，遞增✅",
+        "gate2_detail": "成本判斷：待優化",
+        "gate3_detail": "戶數待確認 0.0%",
+        "passed_count": 2,
+        "all_pass": true
+      },
+      "score": 2,
+      "last_date": "20260519"
+    }
+  ],
   "observe_list": [],
-  "today_ranking": [],
-  "total_tracked": 0,
+  "today_ranking": [
+    {
+      "sym": "",
+      "name": "00953B",
+      "net": 19501125,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "00400A",
+      "net": 13371432,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2313",
+      "net": 13246973,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "00990A",
+      "net": 12995549,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "00997A",
+      "net": 11087600,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "009820",
+      "net": 10607000,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "00992A",
+      "net": 10328175,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2355",
+      "net": 10321100,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2485",
+      "net": 8088116,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "00991A",
+      "net": 8002160,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2615",
+      "net": 7066824,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "00988A",
+      "net": 7027900,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "009816",
+      "net": 7008103,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2027",
+      "net": 6697316,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2409",
+      "net": 6297953,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2891",
+      "net": 6136733,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "3045",
+      "net": 5850671,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "0056",
+      "net": 5628177,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "2542",
+      "net": 5337355,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    },
+    {
+      "sym": "",
+      "name": "8028",
+      "net": 5167411,
+      "date": "20260519",
+      "buy": 0,
+      "sell": 0
+    }
+  ],
   "summary": {
-    "all_pass": 0,
-    "observing": 0,
-    "today_top_count": 0
+    "all_pass": 1,
+    "observing": 0
   }
 }
