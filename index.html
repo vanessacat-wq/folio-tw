@@ -700,49 +700,82 @@ async function loadStock(raw){
   }catch(e){ showErr('資料取得失敗：'+e.message); }
 }
 
-// ── API ── (Finnhub only - no CORS issues)
-const AVKEY='3V3TLKGX0M0EFBI7'; // Alpha Vantage (backup)
+// ── API ── 
+const AVKEY='3V3TLKGX0M0EFBI7';
+
+// Stooq proxy via allorigins (no CORS)
+async function stooqFetch(sym){
+  const s = /^\d{4}$/.test(sym) ? sym+'.tw' : sym.toLowerCase();
+  const url = `https://stooq.com/q/l/?s=${s}&f=sd2t2ohlcvn&h&e=csv`;
+  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const r = await fetch(proxy);
+  if(!r.ok) throw new Error('stooq failed');
+  const txt = await r.text();
+  const lines = txt.trim().split('\n');
+  if(lines.length<2) throw new Error('no data');
+  const vals = lines[1].split(',');
+  // Symbol,Date,Time,Open,High,Low,Close,Volume,Name
+  return {
+    date: vals[1], open: parseFloat(vals[3]), high: parseFloat(vals[4]),
+    low: parseFloat(vals[5]), close: parseFloat(vals[6]),
+    volume: parseInt(vals[7]||0), name: vals[8]||sym
+  };
+}
 
 async function fetchQuote(sym){
-  const isTW=/\.TW$/.test(sym);
-  // Finnhub quote - works for US stocks directly
-  // For TW stocks, use Finnhub with .TW suffix
+  const isTW=/\.TW$/i.test(sym)||/^\d{4}$/.test(sym);
   try{
-    const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
-    if(!r.ok) throw new Error('Finnhub quote failed');
-    const d=await r.json();
-    if(!d.c||d.c===0) throw new Error('no price data');
-    // Get profile for name
-    let name=sym, exchange='', marketCap=0;
+    const d = await stooqFetch(sym);
+    if(!d.close||isNaN(d.close)) throw new Error('no price');
+    // Get prev close from candles
+    let prevClose = d.close;
     try{
-      const pr=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FKEY}`);
-      const pd=await pr.json();
-      if(pd.name){name=pd.name;exchange=pd.exchange||'';marketCap=pd.marketCapitalization*1e6||0;}
+      const candles = await fetchCandlesStooq(sym);
+      if(candles&&candles.length>=2) prevClose = candles[candles.length-2].close;
     }catch(e){}
     return{
-      price:d.c, prevClose:d.pc, open:d.o, high:d.h, low:d.l,
-      volume:0, exchange, name, marketCap,
-      hi52:d.h*1.3||d.c*1.3, lo52:d.l*0.7||d.c*0.7
+      price:d.close, prevClose, open:d.open, high:d.high, low:d.low,
+      volume:d.volume, exchange:isTW?'TWSE':'US', name:d.name||sym,
+      marketCap:0, hi52:0, lo52:0
     };
   }catch(e){
-    throw new Error('無法取得報價。台股請輸入4位數字，美股請輸入英文代碼。');
+    // Fallback to Finnhub for US stocks
+    if(!/^\d{4}/.test(sym)){
+      try{
+        const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
+        const d=await r.json();
+        if(d.c&&d.c>0){
+          let name=sym;
+          try{const pr=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FKEY}`);const pd=await pr.json();if(pd.name)name=pd.name;}catch(e){}
+          return{price:d.c,prevClose:d.pc,open:d.o,high:d.h,low:d.l,volume:0,exchange:'US',name,marketCap:0,hi52:d.h,lo52:d.l};
+        }
+      }catch(e2){}
+    }
+    throw new Error('無法取得報價，請確認代碼正確');
   }
+}
+
+async function fetchCandlesStooq(sym){
+  const s = /^\d{4}$/.test(sym) ? sym+'.tw' : sym.toLowerCase();
+  const url = `https://stooq.com/q/d/l/?s=${s}&i=d`;
+  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const r = await fetch(proxy);
+  if(!r.ok) return null;
+  const txt = await r.text();
+  const lines = txt.trim().split('\n').slice(1); // skip header
+  if(!lines.length) return null;
+  return lines.slice(-100).map(line=>{
+    const v = line.split(',');
+    return{date:new Date(v[0]),open:parseFloat(v[1]),high:parseFloat(v[2]),low:parseFloat(v[3]),close:parseFloat(v[4]),volume:parseInt(v[5]||0)};
+  }).filter(c=>c.close&&!isNaN(c.close));
 }
 
 async function fetchCandles(sym){
   try{
-    const from=Math.floor((Date.now()-100*86400000)/1000);
-    const to=Math.floor(Date.now()/1000);
-    const r=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${FKEY}`);
-    if(!r.ok) return null;
-    const d=await r.json();
-    if(d.s!=='ok'||!d.t||d.t.length===0) return null;
-    return d.t.map((t,i)=>({
-      date:new Date(t*1000),
-      open:d.o[i], high:d.h[i], low:d.l[i],
-      close:d.c[i], volume:d.v[i]
-    }));
-  }catch(e){ return null; }
+    const candles = await fetchCandlesStooq(sym);
+    if(candles&&candles.length>10) return candles;
+  }catch(e){}
+  return null;
 }
 
 async function fetchNews(sym,isTW){
