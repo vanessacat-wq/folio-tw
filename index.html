@@ -700,78 +700,49 @@ async function loadStock(raw){
   }catch(e){ showErr('資料取得失敗：'+e.message); }
 }
 
-// ── API ──
-const AVKEY='3V3TLKGX0M0EFBI7'; // Alpha Vantage
+// ── API ── (Finnhub only - no CORS issues)
+const AVKEY='3V3TLKGX0M0EFBI7'; // Alpha Vantage (backup)
 
 async function fetchQuote(sym){
   const isTW=/\.TW$/.test(sym);
-  // Alpha Vantage GLOBAL_QUOTE — works for US stocks and TW stocks
-  const avSym = isTW ? sym : sym;
-  try {
-    const r=await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${avSym}&apikey=${AVKEY}`);
-    if(!r.ok) throw new Error('AV failed');
+  // Finnhub quote - works for US stocks directly
+  // For TW stocks, use Finnhub with .TW suffix
+  try{
+    const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
+    if(!r.ok) throw new Error('Finnhub quote failed');
     const d=await r.json();
-    const q=d['Global Quote'];
-    if(!q||!q['05. price']) throw new Error('no AV data');
-    const price=parseFloat(q['05. price']);
-    const prevClose=parseFloat(q['08. previous close']||q['05. price']);
-    const open=parseFloat(q['02. open']||price);
-    const high=parseFloat(q['03. high']||price);
-    const low=parseFloat(q['04. low']||price);
-    const vol=parseInt(q['06. volume']||0);
-    // Also get overview for name/market cap
-    let name=sym, marketCap=0, hi52=price*1.3, lo52=price*0.7, exchange='';
+    if(!d.c||d.c===0) throw new Error('no price data');
+    // Get profile for name
+    let name=sym, exchange='', marketCap=0;
     try{
-      const or=await fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${avSym}&apikey=${AVKEY}`);
-      const od=await or.json();
-      if(od.Name){name=od.Name;marketCap=parseFloat(od.MarketCapitalization||0);hi52=parseFloat(od['52WeekHigh']||price*1.3);lo52=parseFloat(od['52WeekLow']||price*0.7);exchange=od.Exchange||'';}
+      const pr=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FKEY}`);
+      const pd=await pr.json();
+      if(pd.name){name=pd.name;exchange=pd.exchange||'';marketCap=pd.marketCapitalization*1e6||0;}
     }catch(e){}
-    return{price,prevClose,open,high,low,volume:vol,exchange,name,marketCap,hi52,lo52};
-  } catch(e) {
-    // Fallback: try Finnhub for US stocks
-    if(!isTW){
-      const r2=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
-      if(!r2.ok) throw new Error('all sources failed');
-      const d2=await r2.json();
-      if(!d2.c) throw new Error('no Finnhub data');
-      return{price:d2.c,prevClose:d2.pc,open:d2.o,high:d2.h,low:d2.l,volume:0,exchange:'',name:sym,marketCap:0,hi52:d2.h*1.2,lo52:d2.l*0.8};
-    }
-    throw new Error('無法取得報價');
+    return{
+      price:d.c, prevClose:d.pc, open:d.o, high:d.h, low:d.l,
+      volume:0, exchange, name, marketCap,
+      hi52:d.h*1.3||d.c*1.3, lo52:d.l*0.7||d.c*0.7
+    };
+  }catch(e){
+    throw new Error('無法取得報價。台股請輸入4位數字，美股請輸入英文代碼。');
   }
 }
 
 async function fetchCandles(sym){
-  const isTW=/\.TW$/.test(sym);
-  try {
-    // Alpha Vantage TIME_SERIES_DAILY
-    const r=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${sym}&outputsize=compact&apikey=${AVKEY}`);
-    if(!r.ok) throw new Error('candle failed');
+  try{
+    const from=Math.floor((Date.now()-100*86400000)/1000);
+    const to=Math.floor(Date.now()/1000);
+    const r=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${FKEY}`);
+    if(!r.ok) return null;
     const d=await r.json();
-    const ts=d['Time Series (Daily)'];
-    if(!ts) throw new Error('no candle data');
-    return Object.entries(ts).slice(0,90).reverse().map(([date,v])=>({
-      date:new Date(date),
-      open:parseFloat(v['1. open']),
-      high:parseFloat(v['2. high']),
-      low:parseFloat(v['3. low']),
-      close:parseFloat(v['4. close']),
-      volume:parseInt(v['5. volume'])
+    if(d.s!=='ok'||!d.t||d.t.length===0) return null;
+    return d.t.map((t,i)=>({
+      date:new Date(t*1000),
+      open:d.o[i], high:d.h[i], low:d.l[i],
+      close:d.c[i], volume:d.v[i]
     }));
-  } catch(e) {
-    // Fallback: Finnhub candles for US stocks
-    if(!isTW){
-      try{
-        const from=Math.floor((Date.now()-90*86400000)/1000);
-        const to=Math.floor(Date.now()/1000);
-        const r2=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${FKEY}`);
-        const d2=await r2.json();
-        if(d2.s==='ok'&&d2.t){
-          return d2.t.map((t,i)=>({date:new Date(t*1000),open:d2.o[i],high:d2.h[i],low:d2.l[i],close:d2.c[i],volume:d2.v[i]}));
-        }
-      }catch(e2){}
-    }
-    return null;
-  }
+  }catch(e){ return null; }
 }
 
 async function fetchNews(sym,isTW){
