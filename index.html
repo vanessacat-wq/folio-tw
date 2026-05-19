@@ -481,7 +481,8 @@ async function loadFTCard(s){
   const el=document.getElementById('ftc-'+s.sym);
   if(!el) return;
   try{
-    const [quote,candles]=await Promise.all([fetchQuote(s.sym),fetchCandles(s.sym)]);
+    const ftSym=/^\d{4}$/.test(s.sym)?s.sym+'.TW':s.sym;
+    const [quote,candles]=await Promise.all([fetchQuote(ftSym),fetchCandles(ftSym)]);
     const chgP=pct(quote.price,quote.prevClose);
     const tech=computeTech(candles);
     const sig=aiScore(tech,chgP);
@@ -525,7 +526,8 @@ function doSearch(){
 async function loadStock(raw){
   setNav('');
   const isTW=/^\d{4}$/.test(raw)||raw.endsWith('.TW');
-  const yS=/^\d{4}$/.test(raw)?raw+'.TW':raw;
+  const avSym = /^\d{4}$/.test(raw) ? raw+'.TW' : raw;
+  const yS = avSym;
   const cS=isTW?'NT$':'$';
   document.getElementById('pageTitle').textContent=raw;
   document.getElementById('pageSub').textContent='載入中...';
@@ -533,7 +535,7 @@ async function loadStock(raw){
 
   try{
     const [qR,cR,nR,pR]=await Promise.allSettled([
-      fetchQuote(yS),fetchCandles(yS),fetchNews(raw,isTW),
+      fetchQuote(avSym),fetchCandles(avSym),fetchNews(raw,isTW),
       isTW?Promise.resolve(null):fetchProfile(raw)
     ]);
     const quote=qR.status==='fulfilled'?qR.value:null;
@@ -699,25 +701,77 @@ async function loadStock(raw){
 }
 
 // ── API ──
+const AVKEY='3V3TLKGX0M0EFBI7'; // Alpha Vantage
+
 async function fetchQuote(sym){
-  const r=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`);
-  if(!r.ok) throw new Error('fetch failed');
-  const d=await r.json(); const m=d?.chart?.result?.[0]?.meta;
-  if(!m) throw new Error('no data');
-  return{price:m.regularMarketPrice,prevClose:m.previousClose||m.chartPreviousClose,
-    open:m.regularMarketOpen||m.regularMarketPrice,high:m.regularMarketDayHigh||m.regularMarketPrice,
-    low:m.regularMarketDayLow||m.regularMarketPrice,volume:m.regularMarketVolume||0,
-    exchange:m.exchangeName||'',name:m.longName||m.shortName||sym,
-    marketCap:m.marketCap||0,hi52:m.fiftyTwoWeekHigh||0,lo52:m.fiftyTwoWeekLow||0};
+  const isTW=/\.TW$/.test(sym);
+  // Alpha Vantage GLOBAL_QUOTE — works for US stocks and TW stocks
+  const avSym = isTW ? sym : sym;
+  try {
+    const r=await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${avSym}&apikey=${AVKEY}`);
+    if(!r.ok) throw new Error('AV failed');
+    const d=await r.json();
+    const q=d['Global Quote'];
+    if(!q||!q['05. price']) throw new Error('no AV data');
+    const price=parseFloat(q['05. price']);
+    const prevClose=parseFloat(q['08. previous close']||q['05. price']);
+    const open=parseFloat(q['02. open']||price);
+    const high=parseFloat(q['03. high']||price);
+    const low=parseFloat(q['04. low']||price);
+    const vol=parseInt(q['06. volume']||0);
+    // Also get overview for name/market cap
+    let name=sym, marketCap=0, hi52=price*1.3, lo52=price*0.7, exchange='';
+    try{
+      const or=await fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${avSym}&apikey=${AVKEY}`);
+      const od=await or.json();
+      if(od.Name){name=od.Name;marketCap=parseFloat(od.MarketCapitalization||0);hi52=parseFloat(od['52WeekHigh']||price*1.3);lo52=parseFloat(od['52WeekLow']||price*0.7);exchange=od.Exchange||'';}
+    }catch(e){}
+    return{price,prevClose,open,high,low,volume:vol,exchange,name,marketCap,hi52,lo52};
+  } catch(e) {
+    // Fallback: try Finnhub for US stocks
+    if(!isTW){
+      const r2=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
+      if(!r2.ok) throw new Error('all sources failed');
+      const d2=await r2.json();
+      if(!d2.c) throw new Error('no Finnhub data');
+      return{price:d2.c,prevClose:d2.pc,open:d2.o,high:d2.h,low:d2.l,volume:0,exchange:'',name:sym,marketCap:0,hi52:d2.h*1.2,lo52:d2.l*0.8};
+    }
+    throw new Error('無法取得報價');
+  }
 }
 
 async function fetchCandles(sym){
-  const r=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=3mo`);
-  if(!r.ok) return null;
-  const d=await r.json(); const res=d?.chart?.result?.[0];
-  if(!res) return null;
-  const ts=res.timestamp||[],q=res.indicators?.quote?.[0]||{};
-  return ts.map((t,i)=>({date:new Date(t*1000),open:q.open?.[i],high:q.high?.[i],low:q.low?.[i],close:q.close?.[i],volume:q.volume?.[i]})).filter(c=>c.close!=null);
+  const isTW=/\.TW$/.test(sym);
+  try {
+    // Alpha Vantage TIME_SERIES_DAILY
+    const r=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${sym}&outputsize=compact&apikey=${AVKEY}`);
+    if(!r.ok) throw new Error('candle failed');
+    const d=await r.json();
+    const ts=d['Time Series (Daily)'];
+    if(!ts) throw new Error('no candle data');
+    return Object.entries(ts).slice(0,90).reverse().map(([date,v])=>({
+      date:new Date(date),
+      open:parseFloat(v['1. open']),
+      high:parseFloat(v['2. high']),
+      low:parseFloat(v['3. low']),
+      close:parseFloat(v['4. close']),
+      volume:parseInt(v['5. volume'])
+    }));
+  } catch(e) {
+    // Fallback: Finnhub candles for US stocks
+    if(!isTW){
+      try{
+        const from=Math.floor((Date.now()-90*86400000)/1000);
+        const to=Math.floor(Date.now()/1000);
+        const r2=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${FKEY}`);
+        const d2=await r2.json();
+        if(d2.s==='ok'&&d2.t){
+          return d2.t.map((t,i)=>({date:new Date(t*1000),open:d2.o[i],high:d2.h[i],low:d2.l[i],close:d2.c[i],volume:d2.v[i]}));
+        }
+      }catch(e2){}
+    }
+    return null;
+  }
 }
 
 async function fetchNews(sym,isTW){
@@ -844,7 +898,7 @@ async function renderSidebarWL(){
   watchlist.slice(0,5).forEach(sym=>{h+=`<div class="wm-item" onclick="qs('${sym}')"><span class="wm-ticker">${sym}</span><span class="wm-chg" id="wmc-${sym}">—</span></div>`;});
   el.innerHTML=h;
   watchlist.slice(0,5).forEach(async sym=>{
-    try{const yS=/^\d{4}$/.test(sym)?sym+'.TW':sym;const q=await fetchQuote(yS);const c=pct(q.price,q.prevClose);
+    try{const wSym=/^\d{4}$/.test(sym)?sym+'.TW':sym;const q=await fetchQuote(wSym);const c=pct(q.price,q.prevClose);
       const e=document.getElementById('wmc-'+sym);if(e){e.className='wm-chg '+(c>=0?'chg-up':'chg-down');e.textContent=(c>=0?'+':'')+c.toFixed(2)+'%';}}catch(e){}
   });
 }
