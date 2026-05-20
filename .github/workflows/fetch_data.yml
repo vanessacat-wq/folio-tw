@@ -1,13 +1,16 @@
-name: 每日台股分點資料抓取
+name: 每日股票資料抓取
+
 on:
   schedule:
     - cron: '30 6 * * 1-5'
   workflow_dispatch:
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,6 +20,7 @@ jobs:
       - run: python scripts/fetch_broker.py
       - run: python scripts/fetch_chips.py
       - run: python scripts/calc_watchlist.py
+      - run: python scripts/fetch_us_candles.py
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
