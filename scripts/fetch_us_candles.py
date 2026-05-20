@@ -1,6 +1,5 @@
 import requests, json, os, time
 from datetime import datetime, timedelta
-
 STOCKS = [
     "NVDA","MSFT","AAPL","GOOGL","META","AMD","AVGO","TSM",
     "PLTR","ARM","SMCI","XOM","CVX","COP","NEE",
@@ -9,7 +8,6 @@ STOCKS = [
     "SPY","QQQ","GLD",
     "TSLA","RKLB","LUNR","ASTS","ARKX"
 ]
-
 def fetch_candle(sym, token):
     frm = int((datetime.now() - timedelta(days=120)).timestamp())
     to = int(datetime.now().timestamp())
@@ -33,7 +31,6 @@ def fetch_candle(sym, token):
     except Exception as e:
         print(f"  Error {sym}: {e}")
     return []
-
 def main():
     token = os.environ.get("FINNHUB_KEY", "d85n131r01qitd92qs00d85n131r01qitd92qs0g")
     os.makedirs("data/us_candles", exist_ok=True)
@@ -53,6 +50,6 @@ def main():
     with open("data/us_candles/index.json", "w") as f:
         json.dump({"updated": datetime.now().strftime("%Y-%m-%d %H:%M"), "stocks": list(results.keys())}, f, indent=2)
     print(f"完成！共 {len(results)} 支")
-
 if __name__ == "__main__":
     main()
+    
