@@ -870,6 +870,74 @@ async function loadTWSE(sym4){
   }catch(e){const ld=document.getElementById('twseLoad');if(ld)ld.innerHTML='<span style="font-size:13px;color:var(--text3)">法人資料暫時無法取得</span>';}
 }
 
+// ── 自選股頁面 ──
+function openWatchlist(){
+  setNav('nav-wl');
+  document.getElementById('pageTitle').textContent='自選股';
+  document.getElementById('pageSub').textContent='我的追蹤清單';
+  const el=document.getElementById('contentArea');
+  if(!watchlist.length){
+    el.innerHTML=`<div class="welcome-state">
+      <div class="welcome-icon">⭐</div>
+      <div class="welcome-title">自選股清單是空的</div>
+      <div class="welcome-desc">分析任一股票後，點「⭐ 加入自選」即可追蹤。</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="section-title" style="margin:0">我的自選股 (${watchlist.length})</div>
+      <button class="btn btn-sm btn-ghost" onclick="clearWL()">清除全部</button>
+    </div>
+    <div class="grid-3" id="wlGrid">
+      ${watchlist.map(sym=>`
+      <div class="card" style="cursor:pointer">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div onclick="qs('${sym}')" style="flex:1">
+            <div style="font-family:'DM Serif Display',serif;font-size:22px">${sym}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px" id="wln-${sym}">載入中...</div>
+          </div>
+          <button onclick="removeWL('${sym}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;padding:0">×</button>
+        </div>
+        <div onclick="qs('${sym}')">
+          <div style="font-size:26px;font-weight:600;letter-spacing:-1px" id="wlp-${sym}">—</div>
+          <div style="font-size:13px;font-weight:500;margin-top:4px" id="wlchg-${sym}">—</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  watchlist.forEach(async sym=>{
+    try{
+      const wSym=/^\d{4}$/.test(sym)?sym+'.TW':sym;
+      const q=await fetchQuote(wSym);
+      const c=pct(q.price,q.prevClose);
+      const isUp=c>=0;
+      const cS=/^\d{4}$/.test(sym)?'NT$':'$';
+      const ne=document.getElementById('wln-'+sym);
+      const pe=document.getElementById('wlp-'+sym);
+      const ce=document.getElementById('wlchg-'+sym);
+      if(ne) ne.textContent=q.name||sym;
+      if(pe) pe.textContent=cS+fmt(q.price);
+      if(ce){ce.textContent=(isUp?'▲':'▼')+' '+Math.abs(c).toFixed(2)+'%';ce.style.color=isUp?'var(--up)':'var(--down)';}
+    }catch(e){}
+  });
+}
+
+function removeWL(sym){
+  watchlist=watchlist.filter(s=>s!==sym);
+  localStorage.setItem('wl',JSON.stringify(watchlist));
+  renderSidebarWL();
+  openWatchlist();
+}
+
+function clearWL(){
+  if(confirm('確定清除所有自選股？')){
+    watchlist=[];
+    localStorage.setItem('wl',JSON.stringify(watchlist));
+    renderSidebarWL();
+    openWatchlist();
+  }
+}
+
 // ── WATCHLIST ──
 function addWL(sym){
   if(!watchlist.includes(sym)){watchlist.push(sym);localStorage.setItem('wl',JSON.stringify(watchlist));renderSidebarWL();}
