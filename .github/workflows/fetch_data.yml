@@ -20,10 +20,14 @@ jobs:
       - run: python scripts/fetch_broker.py
       - run: python scripts/fetch_chips.py
       - run: python scripts/calc_watchlist.py
-      - run: python scripts/fetch_us_candles.py
+      - name: 抓取美股K線
+        run: python scripts/fetch_us_candles.py
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/
           git diff --cached --quiet || git commit -m "📊 自動更新：$(date '+%Y-%m-%d %H:%M')"
           git push
+          
