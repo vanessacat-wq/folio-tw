@@ -794,7 +794,7 @@ async function fetchCandles(sym){
     return valid.length>5?valid:null;
   }
 
-  // 美股：Finnhub candle
+  // 美股：Finnhub candle → Stooq fallback
   try{
     const from=Math.floor((Date.now()-100*86400000)/1000);
     const to=Math.floor(Date.now()/1000);
@@ -802,6 +802,22 @@ async function fetchCandles(sym){
     const d=await r.json();
     if(d.s==='ok'&&d.t&&d.t.length>0){
       return d.t.map((t,i)=>({date:new Date(t*1000),open:d.o[i],high:d.h[i],low:d.l[i],close:d.c[i],volume:d.v[i]}));
+    }
+  }catch(e){}
+
+  // Stooq via corsproxy fallback
+  try{
+    const stooqUrl=`https://stooq.com/q/d/l/?s=${sym.toLowerCase()}.us&i=d`;
+    const proxy=`https://corsproxy.io/?${encodeURIComponent(stooqUrl)}`;
+    const r=await fetch(proxy,{signal:AbortSignal.timeout(9000)});
+    if(r.ok){
+      const txt=await r.text();
+      const lines=txt.trim().split('\n').slice(1);
+      const c=lines.slice(-100).map(l=>{
+        const v=l.split(',');
+        return{date:new Date(v[0]),open:parseFloat(v[1]),high:parseFloat(v[2]),low:parseFloat(v[3]),close:parseFloat(v[4]),volume:parseInt(v[5]||0)};
+      }).filter(c=>c.close&&!isNaN(c.close));
+      if(c.length>10) return c;
     }
   }catch(e){}
   return null;
