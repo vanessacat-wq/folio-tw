@@ -90,8 +90,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .data-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 .data-table tr:last-child td{border-bottom:none}
 .data-table tr:hover td{background:var(--surface2)}
-
-/* ── CNBC Final Trade ── */
 .ft-panel{background:var(--surface);border-radius:var(--radius);border:2px solid #e8c8c8;box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
 .ft-header{background:#1c0000;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .ft-cnbc{background:var(--cnbc);color:#fff;font-weight:800;font-size:13px;padding:4px 10px;border-radius:4px;letter-spacing:.08em;flex-shrink:0}
@@ -130,7 +128,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .rp-hold{background:#fef3c7;color:#92400e}.rp-watch{background:#e0e7ff;color:#3730a3}
 .ft-loading-card{display:flex;align-items:center;justify-content:center;gap:8px;height:100px;color:var(--text3);font-size:12px}
 .ft-empty{text-align:center;padding:20px;color:var(--text3);font-size:13px}
-
 .loading{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:13px;padding:40px;justify-content:center}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -139,8 +136,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .welcome-icon{font-size:44px;margin-bottom:14px;opacity:.2}
 .welcome-title{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:10px}
 .welcome-desc{font-size:14px;color:var(--text2);line-height:1.65;max-width:400px;margin:0 auto 22px}
-
-/* ── 主力分點選股 ── */
 .mb-panel{background:var(--surface);border-radius:var(--radius);border:1.5px solid #c8e6c9;box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
 .mb-header{background:linear-gradient(135deg,#0d3320,#1a5c35);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .mb-badge{background:#1a8a5a;color:#fff;font-weight:700;font-size:12px;padding:4px 10px;border-radius:4px;letter-spacing:.05em}
@@ -175,39 +170,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .mb-rank-name{font-size:12px;color:var(--text3);flex:1}
 .mb-rank-net{font-size:13px;font-weight:600;color:var(--up);min-width:60px;text-align:right}
 .mb-rank-days{font-size:11px;color:var(--text3);min-width:50px;text-align:right}
-.gate-detail{font-size:11px;padding:2px 0;display:flex;gap:4px;align-items:center}
-
+/* K線資料來源標籤 */
+.chart-source{font-size:10px;color:var(--text3);text-align:right;margin-top:4px}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.grid-4{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <div class="app">
-
 <aside class="sidebar">
   <div class="logo">Folio<span>.</span></div>
   <div class="nav-label">Markets</div>
-  <div class="nav-item" onclick="goHome()" id="nav-home">
-    <span>📊</span> Dashboard
-  </div>
-  <div class="nav-item" onclick="hintFilter('tw')">
-    <span>🇹🇼</span> 台股 TWSE <span class="nav-dot dot-up"></span>
-  </div>
-  <div class="nav-item" onclick="hintFilter('us')">
-    <span>🇺🇸</span> 美股 US <span class="nav-dot dot-up"></span>
-  </div>
+  <div class="nav-item" onclick="goHome()" id="nav-home"><span>📊</span> Dashboard</div>
+  <div class="nav-item" onclick="hintFilter('tw')"><span>🇹🇼</span> 台股 TWSE <span class="nav-dot dot-up"></span></div>
+  <div class="nav-item" onclick="hintFilter('us')"><span>🇺🇸</span> 美股 US <span class="nav-dot dot-up"></span></div>
   <div class="nav-label">Tools</div>
-  <div class="nav-item" onclick="openFT()" id="nav-ft">
-    <span>📺</span> CNBC Final Trade <span class="cnbc-nav-badge">HOT</span>
-  </div>
-  <div class="nav-item" onclick="openMasterBroker()" id="nav-mb">
-    <span>🔍</span> 主力分點選股 <span class="cnbc-nav-badge" style="background:#1a8a5a">NEW</span>
-  </div>
+  <div class="nav-item" onclick="openFT()" id="nav-ft"><span>📺</span> CNBC Final Trade <span class="cnbc-nav-badge">HOT</span></div>
+  <div class="nav-item" onclick="openMasterBroker()" id="nav-mb"><span>🔍</span> 主力分點選股 <span class="cnbc-nav-badge" style="background:#1a8a5a">NEW</span></div>
   <div class="nav-item" onclick="alert('即將上線')"><span>⭐</span> 自選股</div>
   <div class="nav-item" onclick="alert('即將上線')"><span>📅</span> 市場行事曆</div>
   <div class="wl-section" id="sidebarWL"><div class="nav-label">自選股</div></div>
 </aside>
-
 <main class="main">
   <div class="header">
     <div>
@@ -215,12 +198,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="page-sub" id="pageSub">搜尋股票，取得 AI 深度分析</div>
     </div>
     <div class="search-bar">
-      <input id="searchInput" type="text" placeholder="代碼 eg. 2330、AAPL、NVDA..."
-        onkeydown="if(event.key==='Enter')doSearch()">
+      <input id="searchInput" type="text" placeholder="代碼 eg. 2330、AAPL、NVDA..." onkeydown="if(event.key==='Enter')doSearch()">
       <button class="btn" onclick="doSearch()">分析 →</button>
     </div>
   </div>
-
   <div class="chips">
     <span class="chip" onclick="qs('2330')">台積電 2330</span>
     <span class="chip" onclick="qs('2317')">鴻海 2317</span>
@@ -231,18 +212,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <span class="chip" onclick="qs('META')">META</span>
     <span class="chip" onclick="qs('MSFT')">MSFT</span>
   </div>
-
-  <div id="contentArea"><!-- filled by JS --></div>
+  <div id="contentArea"></div>
 </main>
 </div>
-
 <script>
 const FKEY='d85n131r01qitd92qs00d85n131r01qitd92qs0g';
+const GH_RAW='https://raw.githubusercontent.com/vanessacat-wq/folio-tw/main';
+// 有預存 K線的美股清單（與 fetch_us_candles.py 同步）
+const US_CANDLES_STOCKS=new Set(['NVDA','MSFT','AAPL','GOOGL','META','AMD','AVGO','TSM',
+  'PLTR','ARM','SMCI','XOM','CVX','COP','NEE','BRK-B','JPM','V','MA',
+  'AMZN','COST','NKE','LLY','JNJ','UNH','LMT','RTX','SPY','QQQ','GLD',
+  'TSLA','RKLB','LUNR','ASTS','ARKX']);
 let priceChart=null;
 let watchlist=JSON.parse(localStorage.getItem('wl')||'["2330","AAPL","NVDA","TSLA"]');
-let ftStocks=[]; // [{sym,trader}]
+let ftStocks=[];
 
-// ── NAV ──
 function goHome(){
   setNav('nav-home');
   document.getElementById('pageTitle').textContent='Stock Intelligence';
@@ -258,56 +242,44 @@ function openFT(){
   buildFTPanel();
 }
 
-// ── 主力分點選股 ──
-const MB_URL = 'https://raw.githubusercontent.com/vanessacat-wq/folio-tw/main/data/watchlist.json';
-let mbData = null;
-let mbActiveTab = 'watchlist';
+const MB_URL=GH_RAW+'/data/watchlist.json';
+let mbData=null,mbActiveTab='watchlist';
 
 async function openMasterBroker(){
   setNav('nav-mb');
   document.getElementById('pageTitle').textContent='主力分點選股';
   document.getElementById('pageSub').textContent='每日自動抓取 · 三關篩選 · 主力吃貨追蹤';
   document.getElementById('contentArea').innerHTML=`<div class="loading"><div class="spinner"></div>載入主力分點資料...</div>`;
-  try {
-    const r = await fetch(MB_URL+'?t='+Date.now());
+  try{
+    const r=await fetch(MB_URL+'?t='+Date.now());
     if(!r.ok) throw new Error('無法取得資料');
-    mbData = await r.json();
+    mbData=await r.json();
     renderMasterBroker();
-  } catch(e) {
-    document.getElementById('contentArea').innerHTML=`
-      <div class="err-msg">⚠️ 無法載入資料：${e.message}</div>
-      <div class="mb-empty">資料每天 14:30 自動更新，非交易日可能無新資料。</div>`;
+  }catch(e){
+    document.getElementById('contentArea').innerHTML=`<div class="err-msg">⚠️ 無法載入資料：${e.message}</div><div class="mb-empty">資料每天 14:30 自動更新，非交易日可能無新資料。</div>`;
   }
 }
 
 function renderMasterBroker(){
   if(!mbData) return;
-  const updated = mbData.last_updated || '—';
-  const summary = mbData.summary || {};
-
-  let html = `
-  <div class="mb-panel">
+  const updated=mbData.last_updated||'—';
+  const summary=mbData.summary||{};
+  let html=`<div class="mb-panel">
     <div class="mb-header">
       <div class="mb-badge">台股</div>
-      <div class="mb-titles">
-        <div class="mb-title">主力分點買超追蹤</div>
-        <div class="mb-sub">連續買超 × 集保戶數 × 三關篩選｜點擊任一股票看完整分析</div>
-      </div>
+      <div class="mb-titles"><div class="mb-title">主力分點買超追蹤</div><div class="mb-sub">連續買超 × 集保戶數 × 三關篩選｜點擊任一股票看完整分析</div></div>
       <div class="mb-updated">更新：${updated}</div>
     </div>
     <div class="mb-body">
       <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
         <div style="background:#f0fff8;border:1px solid #a7f3d0;border-radius:var(--radius-sm);padding:10px 16px;text-align:center">
-          <div style="font-size:22px;font-weight:700;color:var(--up)">${summary.all_pass||0}</div>
-          <div style="font-size:11px;color:#065f46">三關全過</div>
+          <div style="font-size:22px;font-weight:700;color:var(--up)">${summary.all_pass||0}</div><div style="font-size:11px;color:#065f46">三關全過</div>
         </div>
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:10px 16px;text-align:center">
-          <div style="font-size:22px;font-weight:700;color:#b45309">${summary.observing||0}</div>
-          <div style="font-size:11px;color:#92400e">觀察中</div>
+          <div style="font-size:22px;font-weight:700;color:#b45309">${summary.observing||0}</div><div style="font-size:11px;color:#92400e">觀察中</div>
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;text-align:center">
-          <div style="font-size:22px;font-weight:700;color:var(--text)">${(mbData.today_ranking||[]).length}</div>
-          <div style="font-size:11px;color:var(--text3)">今日買超</div>
+          <div style="font-size:22px;font-weight:700;color:var(--text)">${(mbData.today_ranking||[]).length}</div><div style="font-size:11px;color:var(--text3)">今日買超</div>
         </div>
         <div style="flex:1;background:var(--surface2);border-radius:var(--radius-sm);padding:10px 16px;font-size:12px;color:var(--text2)">
           <div style="font-weight:500;margin-bottom:4px;color:var(--text)">三關篩選邏輯</div>
@@ -316,7 +288,6 @@ function renderMasterBroker(){
           <div>🟢 第三關：集保戶數連續減少（籌碼集中）</div>
         </div>
       </div>
-
       <div class="mb-tabs">
         <div class="mb-tab ${mbActiveTab==='watchlist'?'active':''}" onclick="switchMbTab('watchlist')">🔴 三關全過 (${(mbData.watchlist||[]).length})</div>
         <div class="mb-tab ${mbActiveTab==='observe'?'active':''}" onclick="switchMbTab('observe')">🟡 觀察中 (${(mbData.observe_list||[]).length})</div>
@@ -325,31 +296,30 @@ function renderMasterBroker(){
       <div id="mbTabContent">${renderMbTab()}</div>
     </div>
   </div>`;
-
-  document.getElementById('contentArea').innerHTML = html;
+  document.getElementById('contentArea').innerHTML=html;
 }
 
 function switchMbTab(tab){
-  mbActiveTab = tab;
+  mbActiveTab=tab;
   document.querySelectorAll('.mb-tab').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
-  document.getElementById('mbTabContent').innerHTML = renderMbTab();
+  document.getElementById('mbTabContent').innerHTML=renderMbTab();
 }
 
 function renderMbTab(){
   if(!mbData) return '';
-  if(mbActiveTab === 'watchlist'){
-    const list = mbData.watchlist || [];
+  if(mbActiveTab==='watchlist'){
+    const list=mbData.watchlist||[];
     if(!list.length) return `<div class="mb-empty">今日尚無三關全過的股票<br><span style="font-size:12px">資料每日14:30更新</span></div>`;
     return `<div class="mb-grid">${list.map(s=>renderMbCard(s,true)).join('')}</div>`;
   }
-  if(mbActiveTab === 'observe'){
-    const list = mbData.observe_list || [];
+  if(mbActiveTab==='observe'){
+    const list=mbData.observe_list||[];
     if(!list.length) return `<div class="mb-empty">今日尚無觀察中的股票</div>`;
     return `<div class="mb-grid">${list.map(s=>renderMbCard(s,false)).join('')}</div>`;
   }
-  if(mbActiveTab === 'ranking'){
-    const list = mbData.today_ranking || [];
+  if(mbActiveTab==='ranking'){
+    const list=mbData.today_ranking||[];
     if(!list.length) return `<div class="mb-empty">今日排行資料更新中</div>`;
     return `<div>${list.slice(0,20).map((s,i)=>`
       <div class="mb-ranking-row" onclick="qs('${s.sym}')">
@@ -363,20 +333,15 @@ function renderMbTab(){
   return '';
 }
 
-function renderMbCard(s, isAllPass){
-  const gates = s.gates || {};
-  const g1 = gates.gate1, g2 = gates.gate2, g3 = gates.gate3;
-  const scoreBg = isAllPass?'score-full':'score-partial';
-  const nets = (s.recent_nets||[]).slice(0,3).join('→');
-  const trend = s.chips_trend==='decreasing'?'🟢籌碼集中':s.chips_trend==='increasing'?'🔴散戶湧入':'⚪待確認';
+function renderMbCard(s,isAllPass){
+  const gates=s.gates||{};
+  const g1=gates.gate1,g2=gates.gate2,g3=gates.gate3;
+  const scoreBg=isAllPass?'score-full':'score-partial';
+  const nets=(s.recent_nets||[]).slice(0,3).join('→');
+  const trend=s.chips_trend==='decreasing'?'🟢籌碼集中':s.chips_trend==='increasing'?'🔴散戶湧入':'⚪待確認';
   return `<div class="mb-card" onclick="qs('${s.sym}')">
     <div class="mb-score-badge ${scoreBg}">${s.score}/3</div>
-    <div class="mb-card-top">
-      <div>
-        <div class="mb-sym">${s.sym}</div>
-        <div class="mb-name">${s.name||''}</div>
-      </div>
-    </div>
+    <div class="mb-card-top"><div><div class="mb-sym">${s.sym}</div><div class="mb-name">${s.name||''}</div></div></div>
     <div class="mb-gates">
       <div class="gate-dot ${g1?'gate-pass':'gate-fail'}" title="第一關：連續買超"></div>
       <div class="gate-dot ${g2?'gate-pass':'gate-fail'}" title="第二關：成本判斷"></div>
@@ -392,7 +357,7 @@ function renderMbCard(s, isAllPass){
 
 function setNav(id){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const el=document.getElementById(id); if(el) el.classList.add('active');
+  const el=document.getElementById(id);if(el) el.classList.add('active');
 }
 
 function hintFilter(m){
@@ -417,15 +382,12 @@ function renderHome(){
   buildFTPanel();
 }
 
-// ── CNBC FINAL TRADE ──
 function buildFTPanel(){
   const el=document.getElementById('ftPanel');
   if(!el) return;
-
   const pillsHtml=ftStocks.length===0
     ?'<span style="font-size:12px;color:var(--text3)">尚未加入股票 — 輸入代碼後按「加入分析」</span>'
     :ftStocks.map((s,i)=>`<span class="ft-pill">${s.sym}${s.trader?`<span class="ft-pill-trader">· ${s.trader}</span>`:''}<button onclick="removeFT(${i})">×</button></span>`).join('');
-
   const resultsHtml=ftStocks.length===0?'':`
     <hr class="ft-divider">
     <div class="ft-results-header">
@@ -435,31 +397,24 @@ function buildFTPanel(){
     <div class="ft-results" id="ftResults">
       ${ftStocks.map(s=>`<div class="ft-card" id="ftc-${s.sym}"><div class="ft-loading-card"><div class="spinner"></div>${s.sym} 載入中...</div></div>`).join('')}
     </div>`;
-
   el.innerHTML=`
   <div class="ft-panel">
     <div class="ft-header">
       <div class="ft-cnbc">CNBC</div>
-      <div class="ft-titles">
-        <div class="ft-title">Fast Money · Final Trade</div>
-        <div class="ft-sub">節目末段交易員最終推薦股 → 即時報價 + 技術分析 + AI 評分</div>
-      </div>
+      <div class="ft-titles"><div class="ft-title">Fast Money · Final Trade</div><div class="ft-sub">節目末段交易員最終推薦股 → 即時報價 + 技術分析 + AI 評分</div></div>
       <a class="ft-yt" href="https://www.youtube.com/@CNBCtelevision" target="_blank">▶ 前往 CNBC YouTube</a>
     </div>
     <div class="ft-body">
       <div class="ft-hint">💡 看完節目後把交易員喊的股票代碼輸入進來（美股），系統自動批量分析，點卡片可查看完整報告。</div>
       <div class="ft-input-row">
-        <input class="ft-input" id="ftSyms" placeholder="股票代碼，可逗號分隔輸入多支 eg. AAPL, META, NVDA"
-          onkeydown="if(event.key==='Enter')addFT()">
-        <input class="ft-input" id="ftTrader" placeholder="交易員名稱（選填）eg. Tim Seymour" style="max-width:220px"
-          onkeydown="if(event.key==='Enter')addFT()">
+        <input class="ft-input" id="ftSyms" placeholder="股票代碼，可逗號分隔輸入多支 eg. AAPL, META, NVDA" onkeydown="if(event.key==='Enter')addFT()">
+        <input class="ft-input" id="ftTrader" placeholder="交易員名稱（選填）eg. Tim Seymour" style="max-width:220px" onkeydown="if(event.key==='Enter')addFT()">
         <button class="btn btn-cnbc btn-sm" onclick="addFT()">加入分析 →</button>
       </div>
       <div class="ft-pills-row" id="ftPills">${pillsHtml}</div>
       ${resultsHtml}
     </div>
   </div>`;
-
   if(ftStocks.length>0) ftStocks.forEach(s=>loadFTCard(s));
 }
 
@@ -474,8 +429,8 @@ function addFT(){
   buildFTPanel();
 }
 
-function removeFT(i){ ftStocks.splice(i,1); buildFTPanel(); }
-function clearFT(){ ftStocks=[]; buildFTPanel(); }
+function removeFT(i){ftStocks.splice(i,1);buildFTPanel();}
+function clearFT(){ftStocks=[];buildFTPanel();}
 
 async function loadFTCard(s){
   const el=document.getElementById('ftc-'+s.sym);
@@ -490,18 +445,10 @@ async function loadFTCard(s){
     const sc=sig.score;
     const barColor=sc>=65?'var(--up)':sc>=40?'#f59e0b':'var(--down)';
     const rpClass=sig.rating==='BUY'?'rp-buy':sig.rating==='SELL'?'rp-sell':sig.rating==='HOLD'?'rp-hold':'rp-watch';
-
     el.innerHTML=`
       <div class="ft-card-top">
-        <div>
-          <div class="ft-sym">${s.sym}</div>
-          <div class="ft-sname">${quote.name||s.sym}</div>
-          ${s.trader?`<div class="ft-trader-lbl">by ${s.trader}</div>`:''}
-        </div>
-        <div style="text-align:right">
-          <div class="ft-price">$${quote.price.toFixed(2)}</div>
-          <div class="ft-chg ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(chgP).toFixed(2)}%</div>
-        </div>
+        <div><div class="ft-sym">${s.sym}</div><div class="ft-sname">${quote.name||s.sym}</div>${s.trader?`<div class="ft-trader-lbl">by ${s.trader}</div>`:''}</div>
+        <div style="text-align:right"><div class="ft-price">$${quote.price.toFixed(2)}</div><div class="ft-chg ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(chgP).toFixed(2)}%</div></div>
       </div>
       <div class="ft-bar-track"><div class="ft-bar-fill" style="width:${sc}%;background:${barColor}"></div></div>
       <div class="ft-card-foot">
@@ -515,8 +462,7 @@ async function loadFTCard(s){
   }
 }
 
-// ── SEARCH ──
-function qs(sym){ document.getElementById('searchInput').value=sym; doSearch(); }
+function qs(sym){document.getElementById('searchInput').value=sym;doSearch();}
 function doSearch(){
   const raw=document.getElementById('searchInput').value.trim();
   if(!raw){alert('請輸入股票代碼');return;}
@@ -526,13 +472,11 @@ function doSearch(){
 async function loadStock(raw){
   setNav('');
   const isTW=/^\d{4}$/.test(raw)||raw.endsWith('.TW');
-  const avSym = /^\d{4}$/.test(raw) ? raw+'.TW' : raw;
-  const yS = avSym;
+  const avSym=/^\d{4}$/.test(raw)?raw+'.TW':raw;
   const cS=isTW?'NT$':'$';
   document.getElementById('pageTitle').textContent=raw;
   document.getElementById('pageSub').textContent='載入中...';
   document.getElementById('contentArea').innerHTML=`<div class="loading"><div class="spinner"></div>取得 ${raw} 資料與計算分析中...</div>`;
-
   try{
     const [qR,cR,nR,pR]=await Promise.allSettled([
       fetchQuote(avSym),fetchCandles(avSym),fetchNews(raw,isTW),
@@ -543,19 +487,14 @@ async function loadStock(raw){
     const news=nR.status==='fulfilled'?nR.value:[];
     const profile=pR.status==='fulfilled'?pR.value:null;
     if(!quote){showErr('無法取得報價。台股請輸入4位數字，美股請輸入英文代碼。');return;}
-
     document.getElementById('pageTitle').textContent=quote.name||raw;
     document.getElementById('pageSub').textContent=`${raw} · ${quote.exchange||''} · ${isTW?'TWD':'USD'}`;
-
     const chgP=pct(quote.price,quote.prevClose);
     const tech=computeTech(candles);
     const sig=aiScore(tech,chgP);
     const fc=makeForecast(quote,tech);
     const isUp=chgP>=0;
-
     let h='';
-
-    // Hero
     h+=`<div class="stock-hero">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
         <div>
@@ -581,8 +520,6 @@ async function loadStock(raw){
         <div><div class="card-label">Mkt Cap</div><div style="font-weight:500">${fmtV(quote.marketCap)}</div></div>
       </div>
     </div>`;
-
-    // AI + Chart
     h+=`<div class="grid-2">
       <div class="card">
         <div class="section-title">AI 綜合評級</div>
@@ -599,12 +536,10 @@ async function loadStock(raw){
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)">⚠️ AI 分析僅供參考，請自行評估風險。</div>
       </div>
       <div class="card">
-        <div class="section-title">近 3 個月走勢</div>
+        <div class="section-title">近 3 個月走勢 <span id="chartSourceBadge" style="font-size:10px;color:var(--text3);font-weight:400"></span></div>
         <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
       </div>
     </div>`;
-
-    // Technicals
     if(tech){
       const bars=[
         {n:'RSI (14)',v:tech.rsi.toFixed(1),p:tech.rsi,c:tech.rsi<30?'bar-g':tech.rsi>70?'bar-r':'bar-y',l:tech.rsi<30?'超賣':tech.rsi>70?'超買':'中性'},
@@ -635,8 +570,6 @@ async function loadStock(raw){
         </div>
       </div>`;
     }
-
-    // Forecast + News
     h+=`<div class="grid-2" style="margin-bottom:20px">
       <div class="card">
         <div class="section-title">目標價預估</div>
@@ -679,8 +612,6 @@ async function loadStock(raw){
           }).join('')}
       </div>
     </div>`;
-
-    // TWSE
     if(isTW){
       h+=`<div class="card" style="margin-bottom:20px" id="twseCard">
         <div class="section-title">法人動向 Institutional <span style="font-size:12px;color:var(--text3);font-weight:400">（最新交易日）</span></div>
@@ -688,22 +619,15 @@ async function loadStock(raw){
         <div id="twseTbl" style="display:none"></div>
       </div>`;
     }
-
-    // CNBC Final Trade always at bottom
     h+=`<div id="ftPanel" style="margin-top:4px"></div>`;
-
     document.getElementById('contentArea').innerHTML=h;
-    drawChart(candles,cS,isUp);
+    drawChart(candles,cS,isUp,raw);
     if(isTW) loadTWSE(raw.replace('.TW',''));
     buildFTPanel();
-
-  }catch(e){ showErr('資料取得失敗：'+e.message); }
+  }catch(e){showErr('資料取得失敗：'+e.message);}
 }
 
 // ── API ──
-// 台股：TWSE 官方 API（無 CORS）
-// 美股：Finnhub（已確認可用）
-
 function twseDate(offsetMonths=0){
   const d=new Date();
   if(d.getDay()===0)d.setDate(d.getDate()-2);
@@ -711,27 +635,24 @@ function twseDate(offsetMonths=0){
   d.setMonth(d.getMonth()-offsetMonths);
   return d.getFullYear()+''+String(d.getMonth()+1).padStart(2,'0')+'01';
 }
-
 function toNum(s){return parseFloat((s||'0').replace(/,/g,''));}
 
-async function fetchTWSEMonth(sym4, ds){
+async function fetchTWSEMonth(sym4,ds){
   const url=`https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY?stockNo=${sym4}&date=${ds}&response=json`;
   const r=await fetch(url);
   if(!r.ok) return null;
   const data=await r.json();
   if(data.stat!=='OK'||!data.data||!data.data.length) return null;
-  return {data:data.data, title:data.title||''};
+  return{data:data.data,title:data.title||''};
 }
 
 async function fetchQuote(sym){
   const isTW=/^\d{4}$/.test(sym)||/\.TW$/i.test(sym);
   const sym4=sym.replace(/\.TW$/i,'');
-
   if(isTW){
-    // Try current month first, then previous month
     for(let m=0;m<=1;m++){
       try{
-        const res=await fetchTWSEMonth(sym4, twseDate(m));
+        const res=await fetchTWSEMonth(sym4,twseDate(m));
         if(!res) continue;
         const rows=res.data;
         const last=rows[rows.length-1];
@@ -739,23 +660,17 @@ async function fetchQuote(sym){
         const price=toNum(last[6]);
         if(!price||isNaN(price)) continue;
         const name=res.title.split(' ').slice(1,3).join(' ')||sym4;
-        return{
-          price, prevClose:prev?toNum(prev[6]):price,
-          open:toNum(last[3]), high:toNum(last[4]), low:toNum(last[5]),
-          volume:parseInt((last[1]||'0').replace(/,/g,'')),
-          exchange:'TWSE', name, marketCap:0, hi52:0, lo52:0
-        };
-      }catch(e){ continue; }
+        return{price,prevClose:prev?toNum(prev[6]):price,open:toNum(last[3]),high:toNum(last[4]),low:toNum(last[5]),
+          volume:parseInt((last[1]||'0').replace(/,/g,'')),exchange:'TWSE',name,marketCap:0,hi52:0,lo52:0};
+      }catch(e){continue;}
     }
     throw new Error('無法取得台股報價');
   }
-
-  // 美股：Finnhub
   try{
     const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FKEY}`);
     const d=await r.json();
     if(d.c&&d.c>0){
-      let name=sym, marketCap=0;
+      let name=sym,marketCap=0;
       try{
         const pr=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FKEY}`);
         const pd=await pr.json();
@@ -764,11 +679,10 @@ async function fetchQuote(sym){
       return{price:d.c,prevClose:d.pc,open:d.o,high:d.h,low:d.l,volume:0,exchange:'US',name,marketCap,hi52:d.h,lo52:d.l};
     }
     throw new Error('no data');
-  }catch(e){
-    throw new Error('無法取得報價');
-  }
+  }catch(e){throw new Error('無法取得報價');}
 }
 
+// ── fetchCandles：台股用 TWSE，美股優先讀 GitHub 存好的 JSON ──
 async function fetchCandles(sym){
   const isTW=/^\d{4}$/.test(sym)||/\.TW$/i.test(sym);
   const sym4=sym.replace(/\.TW$/i,'');
@@ -777,14 +691,13 @@ async function fetchCandles(sym){
     const allRows=[];
     for(let m=0;m<=2;m++){
       try{
-        const res=await fetchTWSEMonth(sym4, twseDate(m));
+        const res=await fetchTWSEMonth(sym4,twseDate(m));
         if(res) res.data.forEach(row=>{
           const twYear=parseInt(row[0].split('/')[0])+1911;
           const [,mm,dd]=row[0].split('/');
           allRows.push({
             date:new Date(`${twYear}-${mm}-${dd}`),
-            open:toNum(row[3]), high:toNum(row[4]),
-            low:toNum(row[5]), close:toNum(row[6]),
+            open:toNum(row[3]),high:toNum(row[4]),low:toNum(row[5]),close:toNum(row[6]),
             volume:parseInt((row[1]||'0').replace(/,/g,''))
           });
         });
@@ -794,18 +707,38 @@ async function fetchCandles(sym){
     return valid.length>5?valid:null;
   }
 
-  // 美股：Finnhub candle → Stooq fallback
+  // ── 美股 Step 1：讀 GitHub 預存的 K線 JSON（最快、最穩定）──
+  if(US_CANDLES_STOCKS.has(sym)){
+    try{
+      const url=`${GH_RAW}/data/us_candles/${sym}.json?t=${Date.now()}`;
+      const r=await fetch(url);
+      if(r.ok){
+        const d=await r.json();
+        if(d.candles&&d.candles.length>10){
+          // 標記來源供 UI 顯示
+          const result=d.candles.map(c=>({date:new Date(c.date),open:c.open,high:c.high,low:c.low,close:c.close,volume:c.volume}));
+          result._source='github';
+          result._updated=d.updated||'';
+          return result;
+        }
+      }
+    }catch(e){console.warn(`GitHub K線讀取失敗 ${sym}:`,e);}
+  }
+
+  // ── 美股 Step 2：Finnhub 即時抓（fallback）──
   try{
     const from=Math.floor((Date.now()-100*86400000)/1000);
     const to=Math.floor(Date.now()/1000);
     const r=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${FKEY}`);
     const d=await r.json();
     if(d.s==='ok'&&d.t&&d.t.length>0){
-      return d.t.map((t,i)=>({date:new Date(t*1000),open:d.o[i],high:d.h[i],low:d.l[i],close:d.c[i],volume:d.v[i]}));
+      const result=d.t.map((t,i)=>({date:new Date(t*1000),open:d.o[i],high:d.h[i],low:d.l[i],close:d.c[i],volume:d.v[i]}));
+      result._source='finnhub';
+      return result;
     }
   }catch(e){}
 
-  // Stooq via corsproxy fallback
+  // ── 美股 Step 3：Stooq corsproxy（最後備援）──
   try{
     const stooqUrl=`https://stooq.com/q/d/l/?s=${sym.toLowerCase()}.us&i=d`;
     const proxy=`https://corsproxy.io/?${encodeURIComponent(stooqUrl)}`;
@@ -817,7 +750,7 @@ async function fetchCandles(sym){
         const v=l.split(',');
         return{date:new Date(v[0]),open:parseFloat(v[1]),high:parseFloat(v[2]),low:parseFloat(v[3]),close:parseFloat(v[4]),volume:parseInt(v[5]||0)};
       }).filter(c=>c.close&&!isNaN(c.close));
-      if(c.length>10) return c;
+      if(c.length>10){c._source='stooq';return c;}
     }
   }catch(e){}
   return null;
@@ -825,15 +758,13 @@ async function fetchCandles(sym){
 
 async function fetchNews(sym,isTW){
   const url=`https://finnhub.io/api/v1/company-news?symbol=${sym}&from=${dAgo(7)}&to=${td()}&token=${FKEY}`;
-  const r=await fetch(url); if(!r.ok) return [];
-  const d=await r.json(); return Array.isArray(d)?d.slice(0,6):[];
+  const r=await fetch(url);if(!r.ok) return [];
+  const d=await r.json();return Array.isArray(d)?d.slice(0,6):[];
 }
-
 async function fetchProfile(sym){
   const r=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${sym}&token=${FKEY}`);
-  if(!r.ok) return null; return r.json();
+  if(!r.ok) return null;return r.json();
 }
-
 function td(){return new Date().toISOString().split('T')[0];}
 function dAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split('T')[0];}
 
@@ -853,7 +784,6 @@ function computeTech(candles){
   const k=kH===kL?50:(last-kL)/(kH-kL)*100;
   return{sma20,sma50,last,rsi,macdH,bbU,bbL,volR,k};
 }
-
 function avg(a){return a.reduce((s,v)=>s+v,0)/a.length;}
 function calcEMA(data,p){const k=2/(p+1);let e=avg(data.slice(0,p));for(let i=p;i<data.length;i++)e=data[i]*k+e*(1-k);return e;}
 function calcRSI(data,p){let g=0,l=0;for(let i=1;i<=p;i++){const d=data[i]-data[i-1];d>0?g+=d:l-=d;}let ag=g/p,al=l/p;for(let i=p+1;i<data.length;i++){const d=data[i]-data[i-1];ag=(ag*(p-1)+(d>0?d:0))/p;al=(al*(p-1)+(d<0?-d:0))/p;}return al===0?100:100-100/(1+ag/al);}
@@ -877,22 +807,20 @@ function aiScore(tech,chgP){
   const rating=sc>=72?'BUY':sc>=58?'WATCH+':sc>=42?'HOLD':sc>=28?'WATCH-':'SELL';
   return{rating,score:sc,bull,bear};
 }
-
 function rCls(r){return r==='BUY'?'buy':r==='SELL'?'sell':r==='HOLD'?'hold':'watch';}
-
 function makeForecast(quote,tech){
   const p=quote.price;
   let support=p*0.92,resist=p*1.10;
   if(tech){
     support=Math.max(quote.lo52||p*0.7,tech.bbL,(tech.sma50||tech.sma20)*0.95);
     resist=Math.min(quote.hi52||p*1.3,tech.bbU,(tech.sma50||tech.sma20)*1.08);
-    if(resist<p)resist=p*1.05; if(support>p)support=p*0.95;
+    if(resist<p)resist=p*1.05;if(support>p)support=p*0.95;
   }
   return{support:parseFloat(support.toFixed(2)),resist:parseFloat(resist.toFixed(2))};
 }
 
-// ── CHART ──
-function drawChart(candles,cS,isUp){
+// ── CHART（新增 source badge）──
+function drawChart(candles,cS,isUp,sym){
   const ctx=document.getElementById('priceChart');
   if(!ctx||!candles||!candles.length) return;
   if(priceChart)priceChart.destroy();
@@ -906,6 +834,13 @@ function drawChart(candles,cS,isUp){
     plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>`${cS}${c.raw.toFixed(2)}`}}},
     scales:{x:{grid:{display:false},ticks:{maxTicksLimit:6,font:{size:10},color:'#a09890'}},
       y:{grid:{color:'rgba(0,0,0,0.03)'},ticks:{font:{size:10},color:'#a09890',callback:v=>`${cS}${v.toFixed(0)}`}}}}});
+  // 顯示資料來源
+  const badge=document.getElementById('chartSourceBadge');
+  if(badge&&candles._source){
+    const labels={'github':'📁 每日存檔','finnhub':'🔴 Finnhub 即時','stooq':'Stooq'};
+    const updated=candles._updated?` · 更新 ${candles._updated}`:'';
+    badge.textContent=`(${labels[candles._source]||candles._source}${updated})`;
+  }
 }
 
 // ── TWSE ──
@@ -938,11 +873,10 @@ async function loadTWSE(sym4){
 // ── WATCHLIST ──
 function addWL(sym){
   if(!watchlist.includes(sym)){watchlist.push(sym);localStorage.setItem('wl',JSON.stringify(watchlist));renderSidebarWL();}
-  alert(`${sym} 已${watchlist.indexOf(sym)>=0?'加入':'在'}自選股清單`);
+  alert(`${sym} 已加入自選股清單`);
 }
-
 async function renderSidebarWL(){
-  const el=document.getElementById('sidebarWL');if(!el)return;
+  const el=document.getElementById('sidebarWL');if(!el) return;
   let h='<div class="nav-label">自選股</div>';
   watchlist.slice(0,5).forEach(sym=>{h+=`<div class="wm-item" onclick="qs('${sym}')"><span class="wm-ticker">${sym}</span><span class="wm-chg" id="wmc-${sym}">—</span></div>`;});
   el.innerHTML=h;
@@ -956,7 +890,6 @@ async function renderSidebarWL(){
 function pct(p,prev){return prev?((p-prev)/prev*100):0;}
 function fmt(n,d=2){return n!=null?n.toLocaleString('zh-TW',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';}
 function fmtV(v){if(!v)return'—';if(v>=1e9)return(v/1e9).toFixed(2)+'B';if(v>=1e6)return(v/1e6).toFixed(2)+'M';if(v>=1e3)return(v/1e3).toFixed(0)+'K';return v;}
-
 function showErr(msg){
   document.getElementById('contentArea').innerHTML=`<div class="err-msg">⚠️ ${msg}</div>
   <div class="welcome-state"><div class="welcome-title">請重新搜尋</div>
@@ -965,7 +898,6 @@ function showErr(msg){
   buildFTPanel();
 }
 
-// Init
 renderSidebarWL();
 renderHome();
 </script>
@@ -991,40 +923,21 @@ renderHome();
   .chips{margin-bottom:14px}
 }
 </style>
-
 <div class="mobile-search">
   <div class="mobile-search-inner">
-    <input id="mobileSearchInput" type="text" placeholder="輸入代碼 eg. 2330、AAPL..."
-      onkeydown="if(event.key==='Enter'){document.getElementById('searchInput').value=this.value;doSearch()}">
+    <input id="mobileSearchInput" type="text" placeholder="輸入代碼 eg. 2330、AAPL..." onkeydown="if(event.key==='Enter'){document.getElementById('searchInput').value=this.value;doSearch()}">
     <button onclick="document.getElementById('searchInput').value=document.getElementById('mobileSearchInput').value;doSearch()">分析</button>
   </div>
 </div>
-
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
-    <div class="mob-nav-item active" id="mob-home" onclick="mobNav('home')">
-      <span class="mob-nav-icon">📊</span>
-      <span class="mob-nav-label">首頁</span>
-    </div>
-    <div class="mob-nav-item" id="mob-tw" onclick="mobNav('tw')">
-      <span class="mob-nav-icon">🇹🇼</span>
-      <span class="mob-nav-label">台股</span>
-    </div>
-    <div class="mob-nav-item" id="mob-us" onclick="mobNav('us')">
-      <span class="mob-nav-icon">🇺🇸</span>
-      <span class="mob-nav-label">美股</span>
-    </div>
-    <div class="mob-nav-item" id="mob-mb" onclick="mobNav('mb')">
-      <span class="mob-nav-icon">🔍</span>
-      <span class="mob-nav-label">主力選股</span>
-    </div>
-    <div class="mob-nav-item" id="mob-ft" onclick="mobNav('ft')">
-      <span class="mob-nav-icon">📺</span>
-      <span class="mob-nav-label">CNBC</span>
-    </div>
+    <div class="mob-nav-item active" id="mob-home" onclick="mobNav('home')"><span class="mob-nav-icon">📊</span><span class="mob-nav-label">首頁</span></div>
+    <div class="mob-nav-item" id="mob-tw" onclick="mobNav('tw')"><span class="mob-nav-icon">🇹🇼</span><span class="mob-nav-label">台股</span></div>
+    <div class="mob-nav-item" id="mob-us" onclick="mobNav('us')"><span class="mob-nav-icon">🇺🇸</span><span class="mob-nav-label">美股</span></div>
+    <div class="mob-nav-item" id="mob-mb" onclick="mobNav('mb')"><span class="mob-nav-icon">🔍</span><span class="mob-nav-label">主力選股</span></div>
+    <div class="mob-nav-item" id="mob-ft" onclick="mobNav('ft')"><span class="mob-nav-icon">📺</span><span class="mob-nav-label">CNBC</span></div>
   </div>
 </nav>
-
 <script>
 function mobNav(tab){
   document.querySelectorAll('.mob-nav-item').forEach(n=>n.classList.remove('active'));
