@@ -188,7 +188,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="nav-item" onclick="openFT()" id="nav-ft"><span>📺</span> CNBC Final Trade <span class="cnbc-nav-badge">HOT</span></div>
   <div class="nav-item" onclick="openMasterBroker()" id="nav-mb"><span>🔍</span> 主力分點選股 <span class="cnbc-nav-badge" style="background:#1a8a5a">NEW</span></div>
   <div class="nav-item" onclick="openWatchlist()" id="nav-wl"><span>⭐</span> 自選股</div>
-  <div class="nav-item" onclick="alert('即將上線')"><span>📅</span> 市場行事曆</div>
+  <div class="nav-item" onclick="openCalendar()" id="nav-cal"><span>📅</span> 市場行事曆</div>
   <div class="wl-section" id="sidebarWL"><div class="nav-label">自選股</div></div>
 </aside>
 <main class="main">
@@ -868,6 +868,64 @@ async function loadTWSE(sym4){
           ${parseInt((v[9]||'0').replace(/,/g,''))>0?'+':''}${v[9]||'—'} 張</td></tr>
     </tbody></table>`;
   }catch(e){const ld=document.getElementById('twseLoad');if(ld)ld.innerHTML='<span style="font-size:13px;color:var(--text3)">法人資料暫時無法取得</span>';}
+}
+
+
+function openCalendar(){
+  setNav('nav-cal');
+  document.getElementById('pageTitle').textContent='市場行事曆';
+  document.getElementById('pageSub').textContent='財報 · 總經事件 · 台股除權息';
+  const el=document.getElementById('contentArea');
+  const events={
+    earn:[
+      {month:'May',day:'28',title:'NVDA 財報',sub:'Q1 FY2026 EPS 預期 $0.88'},
+      {month:'Jun',day:'5',title:'COST 財報',sub:'Q3 FY2025'},
+      {month:'Jul',day:'22',title:'TSLA 財報',sub:'Q2 2026 預估'},
+      {month:'Jul',day:'24',title:'AAPL 財報',sub:'Q3 FY2026 預估'},
+      {month:'Jul',day:'30',title:'META 財報',sub:'Q2 2026 預估'},
+      {month:'Jul',day:'30',title:'MSFT 財報',sub:'Q4 FY2026 預估'},
+    ],
+    macro:[
+      {month:'Jun',day:'11',title:'Fed 利率決策 FOMC',sub:'預期維持不變 4.25–4.5%'},
+      {month:'Jun',day:'11',title:'CPI 公布',sub:'5月通膨數據'},
+      {month:'Jul',day:'9',title:'CPI 公布',sub:'6月通膨數據'},
+      {month:'Jul',day:'30',title:'Fed 利率決策 FOMC',sub:'7月會議'},
+      {month:'Aug',day:'13',title:'CPI 公布',sub:'7月通膨數據'},
+    ],
+    tw:[
+      {month:'Jun',day:'下旬',title:'台積電 除權息',sub:'2330 預估配息 NT$14+'},
+      {month:'Jul',day:'上旬',title:'鴻海 除權息',sub:'2317 參考去年配息'},
+      {month:'May',day:'30',title:'5月營收公告截止',sub:'上市櫃公司月營收'},
+    ]
+  };
+  function card(e,type){
+    const badge=type==='earn'?'background:#e0e7ff;color:#3730a3':type==='macro'?'background:#fef3c7;color:#92400e':'background:#d1fae5;color:#065f46';
+    const label=type==='earn'?'財報':type==='macro'?'總經':'台股';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:14px">
+      <div style="min-width:52px;text-align:center;background:var(--surface2);border-radius:var(--radius-sm);padding:6px 8px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">${e.month}</div>
+        <div style="font-size:20px;font-weight:600;color:var(--text);line-height:1.2">${e.day}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px">${e.title}
+          <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;margin-left:6px;${badge}">${label}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2)">${e.sub}</div>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=`
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px">美股財報</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${events.earn.map(e=>card(e,'earn')).join('')}</div>
+      <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px">總經事件</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${events.macro.map(e=>card(e,'macro')).join('')}</div>
+      <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px">台股</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${events.tw.map(e=>card(e,'tw')).join('')}</div>
+      <div style="margin-top:20px;padding:14px 18px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text2)">
+        💡 資料為預估日期，以實際公告為準。財報日期可能異動。
+      </div>
+    </div>`;
 }
 
 // ── 自選股頁面 ──
