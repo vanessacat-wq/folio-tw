@@ -185,7 +185,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="nav-item" onclick="hintFilter('tw')"><span>🇹🇼</span> 台股 TWSE <span class="nav-dot dot-up"></span></div>
   <div class="nav-item" onclick="hintFilter('us')"><span>🇺🇸</span> 美股 US <span class="nav-dot dot-up"></span></div>
   <div class="nav-label">Tools</div>
-  <div class="nav-item" onclick="openFT()" id="nav-ft"><span>📺</span> CNBC Final Trade <span class="cnbc-nav-badge">HOT</span></div>
+  <div class="nav-item" onclick="openCNBCHistory()" id="nav-ft"><span>📺</span> CNBC Final Trade <span class="cnbc-nav-badge">HOT</span></div>
   <div class="nav-item" onclick="openMasterBroker()" id="nav-mb"><span>🔍</span> 主力分點選股 <span class="cnbc-nav-badge" style="background:#1a8a5a">NEW</span></div>
   <div class="nav-item" onclick="openWatchlist()" id="nav-wl"><span>⭐</span> 自選股</div>
   <div class="nav-item" onclick="openCalendar()" id="nav-cal"><span>📅</span> 市場行事曆</div>
@@ -232,6 +232,95 @@ function goHome(){
   document.getElementById('pageTitle').textContent='Stock Intelligence';
   document.getElementById('pageSub').textContent='搜尋股票，取得 AI 深度分析';
   renderHome();
+}
+
+const GAS_URL='https://script.google.com/macros/s/AKfycbxwLmXHvmEP-earzjVRu8QBvUCm5Zgi3QgAacHiqRULxjILGcOgZGB_7F0OxOJw0WpG/exec';
+
+async function openCNBCHistory(){
+  setNav('nav-ft');
+  document.getElementById('pageTitle').textContent='CNBC Final Trade';
+  document.getElementById('pageSub').textContent='推薦記錄 · Google Sheets 同步';
+  const el=document.getElementById('contentArea');
+  el.innerHTML=`
+  <div class="ft-panel" style="margin-bottom:20px">
+    <div class="ft-header">
+      <div class="ft-cnbc">CNBC</div>
+      <div class="ft-titles"><div class="ft-title">新增今日推薦</div><div class="ft-sub">輸入交易員推薦的股票，自動存入 Google Sheets</div></div>
+    </div>
+    <div class="ft-body">
+      <div class="ft-input-row">
+        <input class="ft-input" id="gasDate" type="date" style="max-width:160px" value="${new Date().toISOString().split('T')[0]}">
+        <input class="ft-input" id="gasTrader" placeholder="交易員名稱 eg. Tim Seymour">
+        <input class="ft-input" id="gasSym" placeholder="股票代碼 eg. NVDA">
+        <input class="ft-input" id="gasNote" placeholder="備註（選填）">
+        <button class="btn btn-cnbc btn-sm" onclick="gasAdd()">新增 →</button>
+      </div>
+      <div id="gasMsg" style="font-size:13px;margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="section-title" style="margin:0">過去兩個月推薦記錄</div>
+      <button class="btn btn-sm btn-ghost" onclick="gasLoad()">🔄 重新整理</button>
+    </div>
+    <div id="gasTable"><div class="loading"><div class="spinner"></div>載入中...</div></div>
+  </div>
+  <div id="ftPanel" style="margin-top:16px"></div>`;
+  buildFTPanel();
+  gasLoad();
+}
+
+async function gasAdd(){
+  const date=document.getElementById('gasDate').value;
+  const trader=document.getElementById('gasTrader').value.trim();
+  const sym=document.getElementById('gasSym').value.trim().toUpperCase();
+  const note=document.getElementById('gasNote').value.trim();
+  const msg=document.getElementById('gasMsg');
+  if(!date||!trader||!sym){msg.style.color='var(--down)';msg.textContent='⚠️ 日期、交易員、代碼為必填';return;}
+  msg.style.color='var(--text2)';msg.textContent='儲存中...';
+  try{
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'add',date,trader,sym,note})});
+    msg.style.color='var(--up)';msg.textContent=`✅ 已新增：${trader} 推薦 ${sym}`;
+    document.getElementById('gasSym').value='';
+    document.getElementById('gasNote').value='';
+    document.getElementById('gasTrader').value='';
+    gasLoad();
+  }catch(e){msg.style.color='var(--down)';msg.textContent='❌ 儲存失敗，請重試';}
+}
+
+async function gasLoad(){
+  const el=document.getElementById('gasTable');
+  if(!el) return;
+  try{
+    const r=await fetch(GAS_URL+'?action=read');
+    const d=await r.json();
+    if(!d.ok||!d.records.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3)">尚無記錄</div>';return;}
+    const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-2);
+    const recent=d.records.filter(r=>new Date(r.date)>=cutoff).reverse();
+    el.innerHTML=`<div style="overflow-x:auto"><table class="data-table">
+      <thead><tr><th>日期</th><th>交易員</th><th>代碼</th><th>現價</th><th>備註</th></tr></thead>
+      <tbody id="gasTbody">
+        ${recent.map(r=>`<tr>
+          <td style="color:var(--text2)">${r.date}</td>
+          <td style="font-weight:500">${r.trader}</td>
+          <td style="font-family:monospace;font-weight:600;cursor:pointer;color:var(--accent)" onclick="qs('${r.sym}')">${r.sym}</td>
+          <td id="gp-${r.sym}-${r.date}" style="font-size:12px;color:var(--text3)">載入中...</td>
+          <td style="color:var(--text2);font-size:12px">${r.note||'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+    recent.forEach(async r=>{
+      try{
+        const wSym=/^\d{4}$/.test(r.sym)?r.sym+'.TW':r.sym;
+        const q=await fetchQuote(wSym);
+        const c=pct(q.price,q.prevClose);
+        const isUp=c>=0;
+        const cS=/^\d{4}$/.test(r.sym)?'NT$':'$';
+        const td=document.getElementById(`gp-${r.sym}-${r.date}`);
+        if(td) td.innerHTML=`<span style="font-weight:500">${cS}${fmt(q.price)}</span> <span style="color:${isUp?'var(--up)':'var(--down)'}">${isUp?'▲':'▼'}${Math.abs(c).toFixed(2)}%</span>`;
+      }catch(e){}
+    });
+  }catch(e){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--down)">載入失敗，請確認網路連線</div>';}
 }
 
 function openFT(){
